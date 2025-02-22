@@ -67,9 +67,9 @@ jobs:
     
     # 6. 打包生成的文件（假设生成的文件在 `dist` 目录下）
     - name: Archive Radicale Data
-      run: ｜
-        zip -r radicale-data.zip radicale/
-        gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) radicale/*
+      run:  gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) radicale/*
+        # zip -r radicale-data.zip radicale/
+
     
     # # 7. 发布到 GitHub Releases
     # - name: Upload release assets
