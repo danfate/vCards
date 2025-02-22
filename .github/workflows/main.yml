@@ -69,9 +69,9 @@ jobs:
     - name: Archive Radicale Data
       env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-      run:  gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) radicale/*
-        # zip -r radicale-data.zip radicale/
-
+      run: |
+        zip -r radicale-data.zip radicale/
+        gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) radicale-data.zip
     
     # # 7. 发布到 GitHub Releases
     # - name: Upload release assets
