@@ -1,0 +1,53 @@
+name: Sync and Publish vCards Data
+
+on:
+  workflow_dispatch:
+  # 触发条件为 upstream 项目更新
+  # push:
+  #   branches:
+  #     - main
+  # # 或者你可以设置定时同步
+  # schedule:
+  #   - cron: '0 0 * * *'  # 每天 00:00 UTC 更新
+
+jobs:
+  sync_and_publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # 1. Checkout 本地仓库
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    # 2. 设置 Git 环境并同步 upstream
+    - name: Sync upstream repository
+      run: |
+        git remote add upstream https://github.com/metowolf/vCards.git
+        git fetch upstream
+        git checkout master
+        git pull upstream/master
+    
+    # # 3. 设置 Node 环境
+    # - name: Set up Node.js
+    #   uses: actions/setup-node@v3
+    #   with:
+    #     node-version: '16'  # 或你项目使用的 Node 版本
+    
+    # 4. 安装依赖
+    - name: Install dependencies
+      run: yarn
+    
+    # 5. 运行 npm 脚本生成 radicale 数据
+    - name: Generate Radicale data
+      run: yarn radicale
+    
+    # 6. 打包生成的文件（假设生成的文件在 `dist` 目录下）
+    - name: Archive Radicale Data
+      run: zip -r radicale-data.zip radicale/
+    
+    # 7. 发布到 GitHub Releases
+    - name: Upload release assets
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: radicale-data.zip
+        tag: ${{ github.sha }}
