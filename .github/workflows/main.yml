@@ -1,14 +1,14 @@
 name: Sync and Publish vCards Data
 
 on:
-  workflow_dispatch:
+  # workflow_dispatch:
   # 触发条件为 upstream 项目更新
   # push:
   #   branches:
   #     - main
   # # 或者你可以设置定时同步
-  # schedule:
-  #   - cron: '0 0 * * *'  # 每天 00:00 UTC 更新
+  schedule:
+    - cron: '0 22 * * 6'  # 每天 00:00 UTC 更新
 
 jobs:
   sync_and_publish:
@@ -37,17 +37,7 @@ jobs:
         # pr_message: # optional
         # # ignore Exceptions
         # ignore_fail: # optional
-    - name: Capture fork-sync output
-      id: check_changes
-      run: |
-        # 获取 fork-sync 的输出并检查是否有变更
-        output=$(curl -s https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs | jq '.jobs[0].steps[-1].conclusion')
-        if [[ "$output" == "success" ]]; then
-          echo "Changes detected, proceeding."
-        else
-          echo "No changes detected, skipping further steps."
-          exit 0
-        fi     
+
     
     # 1. Checkout 本地仓库
     - name: Checkout repository
