@@ -24,7 +24,7 @@ jobs:
       #   # Owner of the forked repository
         owner: metowolf
         # Token for the github API
-        github_token: ${{ secrets.PERSONAL_TOKEN }}
+        token: ${{ secrets.PERSONAL_TOKEN }}
         # # Branch to track
         # head: # optional, default is master
         # # Branch to keep updated
@@ -39,8 +39,8 @@ jobs:
         # ignore_fail: # optional
     - name: Check if there are any changes
       id: changes
-      run: |
-        echo "Sync output: ${{ steps.sync.outputs.* }}"  # 打印同步的结果
+      run: |    
+        echo "Sync output: ${{ join(steps.sync.outputs.* ,'')}}"  # 打印同步的结果
         if [[ "${{ steps.sync.outputs.sync-result }}" == *"No commits between"* ]]; then
           echo "No changes to sync, skipping subsequent steps."
           exit 0  # 如果没有变更，则退出工作流
