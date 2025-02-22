@@ -36,7 +36,14 @@ jobs:
         # pr_message: # optional
         # # ignore Exceptions
         # ignore_fail: # optional
-          
+    - name: Check if there are any changes
+      id: changes
+      run: |
+        echo "Sync output: ${{ steps.sync.outputs.sync-result }}"  # 打印同步的结果
+        if [[ "${{ steps.sync.outputs.sync-result }}" == *"No commits between"* ]]; then
+          echo "No changes to sync, skipping subsequent steps."
+          exit 0  # 如果没有变更，则退出工作流
+        fi          
     
     # 1. Checkout 本地仓库
     - name: Checkout repository
