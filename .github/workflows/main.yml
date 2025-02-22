@@ -24,8 +24,8 @@ jobs:
       run: |
         git remote add upstream https://github.com/metowolf/vCards.git
         git fetch upstream
-        git checkout master
-        git pull upstream/master
+        git checkout master  # 或者是 main 分支
+        git merge upstream/master  # 或者是 upstream/main
     
     # # 3. 设置 Node 环境
     # - name: Set up Node.js
