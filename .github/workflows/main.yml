@@ -21,7 +21,7 @@ jobs:
       uses: tgymnich/fork-sync@v1.2.1
       with:
       #   # Owner of the forked repository
-      #   owner: # optional
+        owner: metowolf
         # Token for the github API
         github_token: ${{ secrets.PERSONAL_TOKEN }}
         # # Branch to track
@@ -72,10 +72,3 @@ jobs:
       run: |
         zip -r radicale-data.zip radicale/
         gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) radicale-data.zip
-    
-    # # 7. 发布到 GitHub Releases
-    # - name: Upload release assets
-    #   uses: ncipollo/release-action@v1
-    #   with:
-    #     artifacts: radicale-data.zip
-    #     tag: $(date +'%Y%m%d%H%M%S')
