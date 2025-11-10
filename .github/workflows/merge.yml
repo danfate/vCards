@@ -51,7 +51,12 @@ jobs:
     # 4. 运行 npm 脚本生成 radicale 数据
     - name: Generate Radicale data
       run: yarn radicale
-    
+
+    - name: Check gh auth status
+      env:
+        GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+      run: gh auth status
+
     # 5. 打包并创建 Release
     # 注意：你的 gh release create 命令有一个小语法错误（逗号是中文的），已修正
     - name: Archive and Create Release
