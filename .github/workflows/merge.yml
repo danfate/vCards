@@ -1,4 +1,4 @@
-name: auto merge
+name: Sync and Publish vCards Data
 
 on:
   schedule:
@@ -21,28 +21,22 @@ jobs:
     # 2. 设置 Git 环境并同步 upstream
     - name: Sync and merge upstream
       run: |
-        # 配置 git 用户信息，否则无法提交
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         
-        # 添加上游仓库地址
         git remote add upstream https://github.com/metowolf/vCards.git
-        
-        # 从上游仓库拉取最新改动
         git fetch upstream
-        
-        # 切换到你的主分支（假设是 master）
         git checkout master
         
-        # 合并上游仓库的 master 分支到你的当前分支
-        # 如果你希望在没有冲突时自动创建一个合并提交，请使用下面的命令
+        # 合并上游改动
         git merge upstream/master
-        
-        # 如果你只希望在可以“快进式合并”时才合并，防止产生合并提交，可以使用 --ff-only
-        # git merge --ff-only upstream/master
         
         # 将合并后的代码推送到你自己的仓库
         git push origin master
+        
+        # （可选，但推荐）如果 release 步骤依然失败，加入一个短暂延时来解决潜在的 API 同步问题
+        echo "Waiting for 10 seconds to allow for GitHub API replication..."
+        sleep 10
         
     # 3. 安装依赖
     - name: Install dependencies
@@ -52,16 +46,11 @@ jobs:
     - name: Generate Radicale data
       run: yarn radicale
 
-    - name: Check gh auth status
-      env:
-        GH_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-      run: gh auth status
-
     # 5. 打包并创建 Release
-    # 注意：你的 gh release create 命令有一个小语法错误（逗号是中文的），已修正
     - name: Archive and Create Release
       env:
+        # 确保使用 gh CLI 的标准环境变量 GH_TOKEN
         GH_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
       run: |
         zip -r radicale-data.zip radicale/
-        gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) radicale-data.zip
+        gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) radicale-data.zip --notes "Automated release of Radicale data"
