@@ -1,7 +1,7 @@
 name: Sync and Publish vCards Data
 
 on:
-  # workflow_dispatch:
+  workflow_dispatch:
   # 触发条件为 upstream 项目更新
   # push:
   #   branches:
