@@ -46,13 +46,13 @@ jobs:
     # 步骤 3: 安装依赖
     # 仅当步骤 'sync_step' 的输出 'changes_detected' 为 'true' 时才运行
     - name: Install dependencies
-      # if: steps.sync_step.outputs.changes_detected == 'true'
+      if: steps.sync_step.outputs.changes_detected == 'true'
       run: npm install
     
     # 步骤 4: 生成数据
     # 仅当步骤 'sync_step' 的输出 'changes_detected' 为 'true' 时才运行
     - name: Generate Radicale data
-      # if: steps.sync_step.outputs.changes_detected == 'true'
+      if: steps.sync_step.outputs.changes_detected == 'true'
       run: npm run radicale
 
     # 步骤 5: 打包并创建 Release
