@@ -1,4 +1,4 @@
-name: Sync and Publish vCards Data
+name: auto merge
 
 on:
   schedule:
