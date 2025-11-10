@@ -50,7 +50,7 @@ jobs:
     - name: Archive and Create Release
       env:
         # 确保使用 gh CLI 的标准环境变量 GH_TOKEN
-        GH_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
       run: |
         zip -r radicale-data.zip radicale/
         gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) radicale-data.zip --notes "Automated release of Radicale data"
