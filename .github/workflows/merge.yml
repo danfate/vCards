@@ -56,7 +56,8 @@ jobs:
     # 注意：你的 gh release create 命令有一个小语法错误（逗号是中文的），已修正
     - name: Archive and Create Release
       env:
-        GH_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
       run: |
         zip -r radicale-data.zip radicale/
+        gh auth refresh -h github.com -s workflow
         gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) radicale-data.zip --notes "Automated release of Radicale data"
