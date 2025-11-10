@@ -2,56 +2,67 @@ name: Merge Data
 
 on:
   schedule:
-    - cron: '0 22 * * 6' # 每周六 22:00 UTC 运行
-  workflow_dispatch: # 允许手动触发
+    - cron: '0 14 * * *'
+  workflow_dispatch:
 
 jobs:
   sync_and_publish:
     runs-on: ubuntu-latest
     
     steps:
-    # 1. Checkout 本地仓库
-    # 使用 PERSONAL_TOKEN 来 checkout，这样后续才有权限 push 回仓库
+    # 步骤 1: 检出代码
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         token: ${{ secrets.PERSONAL_TOKEN }}
-        fetch-depth: 0 # 获取所有历史记录，以便正确合并
+        fetch-depth: 0
 
-    # 2. 设置 Git 环境并同步 upstream
+    # 步骤 2: 同步上游，并根据结果设置一个输出
     - name: Sync and merge upstream
+      # 给这个步骤一个 id，以便后续步骤可以引用它的输出
+      id: sync_step 
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         
         git remote add upstream https://github.com/metowolf/vCards.git
         git fetch upstream
-        git checkout master
         
-        # 合并上游改动
-        git merge upstream/master
+        # 只有当上游确实有新提交时...
+        if [ $(git rev-list HEAD...upstream/master --count) -gt 0 ]; then
+          echo "✅ Upstream has new changes. Merging, pushing, and preparing to build."
+          git checkout master
+          git merge upstream/master
+          git push origin master
+          
+          # 设置输出变量 'changes_detected' 为 'true'
+          echo "changes_detected=true" >> $GITHUB_OUTPUT
+        else
+          echo "✅ No new changes from upstream. Skipping build and release."
+          # （可选）可以显式设置输出为false，但默认不设置也行
+          echo "changes_detected=false" >> $GITHUB_OUTPUT
+        fi
         
-        # 将合并后的代码推送到你自己的仓库
-        git push origin master
-        
-        # （可选，但推荐）如果 release 步骤依然失败，加入一个短暂延时来解决潜在的 API 同步问题
-        echo "Waiting for 10 seconds to allow for GitHub API replication..."
-        sleep 10
-        
-    # 3. 安装依赖
+    # 步骤 3: 安装依赖
+    # 仅当步骤 'sync_step' 的输出 'changes_detected' 为 'true' 时才运行
     - name: Install dependencies
+      if: steps.sync_step.outputs.changes_detected == 'true'
       run: yarn
     
-    # 4. 运行 npm 脚本生成 radicale 数据
+    # 步骤 4: 生成数据
+    # 仅当步骤 'sync_step' 的输出 'changes_detected' 为 'true' 时才运行
     - name: Generate Radicale data
+      if: steps.sync_step.outputs.changes_detected == 'true'
       run: yarn radicale
 
-    # 5. 打包并创建 Release
+    # 步骤 5: 打包并创建 Release
+    # 仅当步骤 'sync_step' 的输出 'changes_detected' 为 'true' 时才运行
     - name: Archive and Create Release
+      if: steps.sync_step.outputs.changes_detected == 'true'
       env:
-        # 确保使用 gh CLI 的标准环境变量 GH_TOKEN
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        GH_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
       run: |
         zip -r radicale-data.zip radicale/
-        gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) radicale-data.zip --notes "Automated release of Radicale data" --repo "${GITHUB_REPOSITORY}"
-        
+        gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) radicale-data.zip \
+          --notes "Automated release of Radicale data" \
+          --repo "${GITHUB_REPOSITORY}"
