@@ -53,4 +53,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
       run: |
         zip -r radicale-data.zip radicale/
-        gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) radicale-data.zip --notes "Automated release of Radicale data"
+        gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) radicale-data.zip --notes "Automated release of Radicale data" --repo "${GITHUB_REPOSITORY}"
+        
